@@ -1,0 +1,67 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+
+# OS / Editor artifacts
+.DS_Store
+*.swp
+*.swo
+.vscode/
+
+# Logs & local output
+output_dir/
+*.log
+
+# Model caches (prefer global HF cache outside repo)
+# Uncomment if you accidentally create local cache folders
+# hf_cache/
+
+# Hugging Face token files (never commit)
+.hf_token
+
+# Pickle artifacts (optional – keep if needed)
+# *.pkl
+
+# Red list generated outputs (keep source pkl if tracked intentionally)
+# red_lists/*.pkl
+
+# Input scratch
+input_dir/*.tmp
+
+# Coverage / testing
+.coverage
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Wheel files
+*.whl
+
+# Environment files
+.env
+.env.*
+
+# PyInstaller
+*.spec
+
+# Cache directories
+.cache/
+
+# Local tools
+.mypy_cache/
+.pytest_cache/
+
+# Git merge backups
+*.orig
