@@ -50,16 +50,20 @@ def generate_toks(
     top_p=1.0,
     seed=None,
 ):
+    """Generate tokens continuing from input_toks on the same device as model.
 
+    This version no longer hard-codes CUDA; it infers the proper device from
+    model/input_toks so CPU fallbacks work correctly.
+    """
     EOS = tokenizer.eos_token_id
 
     torch.manual_seed(seed)
-    bsz, prompt_len = input_toks.shape
-    eos_flag = torch.zeros(bsz, 1, dtype=torch.bool)
-    out_ents = torch.empty(bsz, 0).to("cuda")
+    device = input_toks.device
+    bsz, _ = input_toks.shape
+    eos_flag = torch.zeros(bsz, 1, dtype=torch.bool, device=device)
+    out_ents = torch.empty(bsz, 0, device=device)
 
-    for inx in range(max_num_toks):
-
+    for _ in range(max_num_toks):
         logits = model(input_toks).logits[:, -1, :]
 
         if red_list:
@@ -68,13 +72,11 @@ def generate_toks(
         probs = F.softmax(logits / temperature, dim=-1)
 
         nan_check = torch.isnan(probs)
-        if (nan_check).any():
+        if nan_check.any():
             rows_with_nan = nan_check.any(dim=1)
             rows_with_nan_indices = torch.nonzero(rows_with_nan).squeeze()
-
             if rows_with_nan_indices.dim() == 0:
                 rows_with_nan_indices = rows_with_nan_indices.unsqueeze(0)
-
             for idx in rows_with_nan_indices:
                 probs[idx] = 0
                 probs[idx, EOS] = 1.0
@@ -88,7 +90,6 @@ def generate_toks(
 
         if (next_tok == EOS).any():
             eos_flag[next_tok == EOS] = True
-
         if eos_flag.all():
             break
 
@@ -140,13 +141,19 @@ def main():
     t_p_grid = [(t, p) for t in temp_list for p in top_p_list]
     N = args.N
 
+    # Determine the device of the model's first parameter for token placement.
+    try:
+        model_param_device = next(model.parameters()).device
+    except StopIteration:
+        model_param_device = torch.device("cpu")
+
     for inx, conv in enumerate(convs):
         if not args.in_prompt.isdigit():
             quote_label = conv[-1]["content"]
 
         input_toks = tokenizer.apply_chat_template(
             conv, tokenize=True, add_generation_prompt=True, return_tensors="pt"
-        ).to("cuda")
+        ).to(model_param_device)
 
         input_toks = input_toks.repeat(bsz, 1)
 
