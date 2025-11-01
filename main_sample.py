@@ -150,10 +150,29 @@ def main():
     for inx, conv in enumerate(convs):
         if not args.in_prompt.isdigit():
             quote_label = conv[-1]["content"]
-
-        input_toks = tokenizer.apply_chat_template(
-            conv, tokenize=True, add_generation_prompt=True, return_tensors="pt"
-        ).to(model_param_device)
+        # Always initialize; we'll assign below.
+        input_toks = None
+        if getattr(tokenizer, "chat_template", None):
+            try:
+                input_toks = tokenizer.apply_chat_template(
+                    conv, tokenize=True, add_generation_prompt=True, return_tensors="pt"
+                ).to(model_param_device)
+            except Exception as e:
+                # Fallback to plain prompt if template application fails (e.g., malformed template)
+                print(f"[WARN] chat template failed: {e}. Falling back to plain prompt construction.")
+        if input_toks is None:
+            # Plain prompt fallback (non-chat models or failed template)
+            plain_parts = []
+            for msg in conv:
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                if role == "user":
+                    plain_parts.append(f"User: {content}\n")
+                else:
+                    plain_parts.append(f"Assistant: {content}\n")
+            plain_parts.append("Assistant:")  # cue for generation
+            plain_prompt = "".join(plain_parts)
+            input_toks = tokenizer.encode(plain_prompt, return_tensors="pt").to(model_param_device)
 
         if inx == 0:
             print(f"[INFO] Starting generation loop: bsz={bsz}, temps={temp_list}, top_ps={top_p_list}, N={N}, max_len={args.max_len}, device={model_param_device}")
