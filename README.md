@@ -246,6 +246,22 @@ Consider adding:
 PRs welcome!
 
 ---
+### Offload Error Troubleshooting ("You are trying to offload the whole model to the disk")
+This occurs when `device_map="auto"` cannot place any layers on GPU/RAM and would need full disk offload. Fix paths:
+1. Use smaller model: `--model gemma-7b` or `Mistral-7B`.
+2. Force CPU load: `LLM_FORCE_CPU=1 python main_sample.py ...`.
+3. Try 4-bit quantization: `LLM_USE_4BIT=1`.
+4. Provide explicit offload folder: `LLM_OFFLOAD_FOLDER=offload_weights` (slow).
+5. Reduce batch/length: `--bsz 1 --max_len 25`.
+
+Diagnostics:
+```bash
+python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
+python -c "import transformers, bitsandbytes; print('Transformers version', transformers.__version__)"
+```
+If fallback triggers, loader prints a `[WARN]` and then performs CPU fp32 load (slow but consistent).
+
+---
 ## 11. License
 
 MIT License. See `LICENSE` (add one if missing).

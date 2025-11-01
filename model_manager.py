@@ -51,23 +51,41 @@ def load_model_and_tokenizer(args_model):
     if args_model == "Llama-2-7b":
         model_path = "meta-llama/Llama-2-7b-chat-hf"
         tokenizer = AutoTokenizer.from_pretrained(model_path, token=hf_token)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map=device_map,
-            torch_dtype=pick_dtype(torch.float16),
-            quantization_config=quantization_config,
-            token=hf_token,
-        )
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=device_map,
+                torch_dtype=pick_dtype(torch.float16),
+                quantization_config=quantization_config,
+                token=hf_token,
+            )
+        except Exception as e:
+            print(f"[WARN] Primary load failed for {model_path}: {e}\nFalling back to CPU fp32 load.")
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=None,
+                torch_dtype=torch.float32,
+                token=hf_token,
+            )
     elif args_model == "Llama-2-13b":
         model_path = "meta-llama/Llama-2-13b-chat-hf"
         tokenizer = AutoTokenizer.from_pretrained(model_path, token=hf_token)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map=device_map,
-            torch_dtype=pick_dtype(torch.float16),
-            quantization_config=quantization_config,
-            token=hf_token,
-        )
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=device_map,
+                torch_dtype=pick_dtype(torch.float16),
+                quantization_config=quantization_config,
+                token=hf_token,
+            )
+        except Exception as e:
+            print(f"[WARN] Primary load failed for {model_path}: {e}\nFalling back to CPU fp32 load.")
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=None,
+                torch_dtype=torch.float32,
+                token=hf_token,
+            )
     elif args_model == "Llama-2-70b":
         model_path = "meta-llama/Llama-2-70b-chat-hf"
         tokenizer = AutoTokenizer.from_pretrained(model_path, token=hf_token)
@@ -76,53 +94,98 @@ def load_model_and_tokenizer(args_model):
             llm_int4_threshold=200.0,
             bnb_4bit_compute_dtype=torch.float16,
         ) if not force_cpu else None
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map=device_map,
-            torch_dtype=pick_dtype(torch.float16),
-            quantization_config=big_quant_cfg,
-            token=hf_token,
-        ).eval()
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=device_map,
+                torch_dtype=pick_dtype(torch.float16),
+                quantization_config=big_quant_cfg,
+                token=hf_token,
+            ).eval()
+        except Exception as e:
+            print(f"[WARN] Primary load failed for {model_path}: {e}\nAttempting CPU fp32 fallback (slow).")
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=None,
+                torch_dtype=torch.float32,
+                token=hf_token,
+            ).eval()
     elif args_model == "Llama-3-8B":
         model_path = "meta-llama/Meta-Llama-3-8B-Instruct"
         tokenizer = AutoTokenizer.from_pretrained(model_path, token=hf_token)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map=device_map,
-            torch_dtype=pick_dtype(torch.bfloat16),
-            quantization_config=quantization_config,
-            token=hf_token,
-        )
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=device_map,
+                torch_dtype=pick_dtype(torch.bfloat16),
+                quantization_config=quantization_config,
+                token=hf_token,
+            )
+        except Exception as e:
+            print(f"[WARN] Primary load failed for {model_path}: {e}\nFalling back to CPU fp32 load.")
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=None,
+                torch_dtype=torch.float32,
+                token=hf_token,
+            )
     elif args_model == "Llama-3-70B":
         model_path = "meta-llama/Meta-Llama-3-70B-Instruct"
         tokenizer = AutoTokenizer.from_pretrained(model_path, token=hf_token)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map=device_map,
-            torch_dtype=pick_dtype(torch.bfloat16),
-            quantization_config=quantization_config,
-            token=hf_token,
-        )
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=device_map,
+                torch_dtype=pick_dtype(torch.bfloat16),
+                quantization_config=quantization_config,
+                token=hf_token,
+            )
+        except Exception as e:
+            print(f"[WARN] Primary load failed for {model_path}: {e}\nFalling back to CPU fp32 load.")
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=None,
+                torch_dtype=torch.float32,
+                token=hf_token,
+            )
     elif args_model == "gemma-7b":
         model_path = "google/gemma-7b-it"
         tokenizer = AutoTokenizer.from_pretrained(model_path, token=hf_token)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map=device_map,
-            torch_dtype=pick_dtype(torch.bfloat16),
-            quantization_config=quantization_config,
-            token=hf_token,
-        )
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=device_map,
+                torch_dtype=pick_dtype(torch.bfloat16),
+                quantization_config=quantization_config,
+                token=hf_token,
+            )
+        except Exception as e:
+            print(f"[WARN] Primary load failed for {model_path}: {e}\nFalling back to CPU fp32 load.")
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=None,
+                torch_dtype=torch.float32,
+                token=hf_token,
+            )
     elif args_model == "Mistral-7B":
         model_path = "mistralai/Mistral-7B-Instruct-v0.2"  
         tokenizer = AutoTokenizer.from_pretrained(model_path, token=hf_token)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map=device_map,
-            torch_dtype=pick_dtype(torch.float16),
-            quantization_config=quantization_config,
-            token=hf_token,
-        )
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=device_map,
+                torch_dtype=pick_dtype(torch.float16),
+                quantization_config=quantization_config,
+                token=hf_token,
+            )
+        except Exception as e:
+            print(f"[WARN] Primary load failed for {model_path}: {e}\nFalling back to CPU fp32 load.")
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=None,
+                torch_dtype=torch.float32,
+                token=hf_token,
+            )
     elif args_model == "Mixtral-8x7B":
         model_path = "mistralai/Mixtral-8x7B-Instruct-v0.1" 
         tokenizer = AutoTokenizer.from_pretrained(model_path, token=hf_token)
@@ -130,13 +193,22 @@ def load_model_and_tokenizer(args_model):
             llm_int4_threshold=200.0,
             bnb_4bit_compute_dtype=torch.float16,
         ) if not force_cpu else None
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map=device_map,
-            torch_dtype=pick_dtype(torch.float16),
-            quantization_config=big_quant_cfg,
-            token=hf_token,
-        ).eval()
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=device_map,
+                torch_dtype=pick_dtype(torch.float16),
+                quantization_config=big_quant_cfg,
+                token=hf_token,
+            ).eval()
+        except Exception as e:
+            print(f"[WARN] Primary load failed for {model_path}: {e}\nAttempting CPU fp32 fallback (slow).")
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=None,
+                torch_dtype=torch.float32,
+                token=hf_token,
+            ).eval()
     else:
         raise ValueError(f"Unknown model: {args_model}")
 
@@ -149,5 +221,15 @@ def load_model_and_tokenizer(args_model):
             disk_offload(model, offload_folder=offload_folder)
         except Exception:
             pass
+
+    # Debug summary
+    try:
+        print("[LOAD SUMMARY] model=", model_name,
+              " force_cpu=", force_cpu,
+              " use_4bit=", use_4bit,
+              " quant_cfg=", bool(quantization_config) if 'quantization_config' in locals() else 'n/a',
+              " device_map=", device_map)
+    except Exception:
+        pass
 
     return model_name, model, tokenizer
