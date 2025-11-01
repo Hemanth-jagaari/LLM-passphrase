@@ -261,6 +261,45 @@ python -c "import transformers, bitsandbytes; print('Transformers version', tran
 ```
 If fallback triggers, loader prints a `[WARN]` and then performs CPU fp32 load (slow but consistent).
 
+### Stuck at "Loading checkpoint shards: 0%"
+If you repeatedly see progress bars stuck at 0% and then the script exits without writing output files:
+1. Model download may not have completed (network/firewall). Try a tiny model first:
+  ```bash
+  python main_sample.py --model distilgpt2 --in_prompt 6 --bsz 1 --N 1 --max_len 10 --out_subdir tiny_test
+  ```
+  This should finish quickly and create `./output_dir/tiny_test/`.
+2. Silent CPU fallback + very slow first forward pass on large model. On pure CPU, a 7B model can take several minutes before the first generation loop starts. Wait for the `[INFO] Starting generation loop` line—output files are written only after generation, not during the shard load.
+3. Interrupted download cache corruption. Clear the partial cache for that model only (careful!):
+  ```bash
+  ls ~/.cache/huggingface/hub/  # identify the model directory
+  # Remove only the broken snapshot folder for the model
+  rm -rf ~/.cache/huggingface/hub/models--google--gemma-7b-it/snapshots/<partial_sha>
+  ```
+  Then rerun.
+4. Firewall blocks large file streaming. Prefetch via CLI:
+  ```bash
+  huggingface-cli download google/gemma-7b-it --local-dir ./models/gemma-7b-it
+  export HF_HOME=$(pwd)/models
+  python main_sample.py --model gemma-7b --in_prompt 6 --bsz 1 --N 1 --out_subdir gemma_prefetch
+  ```
+5. Disk full or insufficient space. Check free space:
+  ```bash
+  df -h .
+  ```
+  Gemma 7B needs multiple GB.
+6. Bitsandbytes import hanging. Temporarily force CPU:
+  ```bash
+  LLM_FORCE_CPU=1 python main_sample.py --model gemma-7b --in_prompt 6 --bsz 1 --N 1 --max_len 10 --out_subdir cpu_test
+  ```
+7. Verify Python isn’t killed (OOM / cgroup). Check `dmesg | tail` (Linux) or Console.app (macOS) for kill messages.
+
+If `distilgpt2` works but larger models do not, gather diagnostics:
+```bash
+python -c "import torch, transformers; print(torch.__version__, transformers.__version__, torch.cuda.is_available())"
+python -c "import os; print('HF_HOME:', os.environ.get('HF_HOME'))"
+```
+Share these to continue debugging.
+
 ---
 ## 11. License
 

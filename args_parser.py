@@ -53,6 +53,7 @@ def parse_arguments():
             "gemma-7b",
             "Mistral-7B",
             "Mixtral-8x7B",
+            "distilgpt2",
         ],
         default="Llama-2-7b",
         help="Choose a language model among Llama-2-7b, Llama-2-13b, Llama-2-70b, Llama-3-8B, Llama-3-70B, Mistral-7B, Mixtral-8x7B, gemma-7b. Default is 'Llama-2-7b' when no arg is provided.",

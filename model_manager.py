@@ -24,11 +24,16 @@ def load_model_and_tokenizer(args_model):
     hf_token = _get_hf_token()
 
     force_cpu = os.environ.get("LLM_FORCE_CPU") == "1"
+    cuda_available = torch.cuda.is_available()
+    if not cuda_available and not force_cpu:
+        # Implicitly force CPU if CUDA is absent
+        force_cpu = True
+        print("[INFO] CUDA not available; forcing CPU load.")
     # Allow user to turn on 4-bit quant via env var (when bitsandbytes installed)
     use_4bit = os.environ.get("LLM_USE_4BIT") == "1"
     offload_folder = os.environ.get("LLM_OFFLOAD_FOLDER")  # optional disk offload folder
 
-    # device_map strategy
+    # device_map strategy (avoid accelerate auto mapping when pure CPU)
     if force_cpu:
         device_map = None
     else:
@@ -36,8 +41,9 @@ def load_model_and_tokenizer(args_model):
 
     # dtype preference: prefer bfloat16 when model paths specify it; else float16 unless on pure CPU
     def pick_dtype(pref):
+        # Always use float32 on CPU for reliability (avoid bfloat16 kernels missing)
         if force_cpu:
-            return torch.float32  # safest for CPU
+            return torch.float32
         return pref
 
     quantization_config = None
@@ -209,10 +215,34 @@ def load_model_and_tokenizer(args_model):
                 dtype=torch.float32,
                 token=hf_token,
             ).eval()
+    elif args_model == "distilgpt2":
+        # Tiny sanity-check model
+        model_path = "distilgpt2"
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=device_map,
+                dtype=pick_dtype(torch.float32),  # stays fp32; tiny anyway
+            )
+        except Exception as e:
+            print(f"[WARN] Primary load failed for {model_path}: {e}\nFalling back to CPU fp32 load.")
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                device_map=None,
+                dtype=torch.float32,
+            )
     else:
         raise ValueError(f"Unknown model: {args_model}")
 
     model_name = os.path.basename(model_path.rstrip("/"))
+
+    # Print a concise line about where the model lives
+    try:
+        first_param_device = next(model.parameters()).device
+        print(f"[INFO] Model '{model_name}' loaded on device={first_param_device}, dtype={next(model.parameters()).dtype}")
+    except Exception:
+        pass
 
     # Optional disk offload hint
     if offload_folder and not force_cpu:

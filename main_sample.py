@@ -155,6 +155,9 @@ def main():
             conv, tokenize=True, add_generation_prompt=True, return_tensors="pt"
         ).to(model_param_device)
 
+        if inx == 0:
+            print(f"[INFO] Starting generation loop: bsz={bsz}, temps={temp_list}, top_ps={top_p_list}, N={N}, max_len={args.max_len}, device={model_param_device}")
+
         input_toks = input_toks.repeat(bsz, 1)
 
         for t_p in t_p_grid:
@@ -185,6 +188,7 @@ def main():
                     top_p=top_p,
                     bot_q=bot_q,
                 )
+            print(f"[INFO] Completed temp={temperature} top_p={top_p}")
 
         pw_utils.log_args(
             out_dir,
@@ -194,6 +198,7 @@ def main():
             temp_list,
             top_p_list,
         )
+    print(f"[INFO] Generation complete. Output files written to: {out_dir}")
 
 
 if __name__ == "__main__":
