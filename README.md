@@ -40,6 +40,7 @@ If you encounter SSL or permission issues on Windows, see the Windows section be
 |-----------------|--------------------------------------------------|------------------------------------|
 | Llama-2-7b      | meta-llama/Llama-2-7b-chat-hf                    | fp16                               |
 | Llama-2-13b     | meta-llama/Llama-2-13b-chat-hf                   | fp16                               |
+| `--max_len`     | Max generation tokens (default 50)               |
 | Llama-2-70b     | meta-llama/Llama-2-70b-chat-hf                   | 4-bit (bitsandbytes) quant         |
 | Llama-3-8B      | meta-llama/Meta-Llama-3-8B-Instruct              | bfloat16                           |
 | Llama-3-70B     | meta-llama/Meta-Llama-3-70B-Instruct             | bfloat16                           |
@@ -186,6 +187,24 @@ Token sampling logic is implemented in `pw_utils.pw_sample_top_p`.
 3. Limit generation length by editing `max_num_toks` in `generate_toks` (default 50).
 4. Use 4-bit quantized options (Llama-2-70b, Mixtral) already configured in `model_manager.py`.
 5. For pure CPU fallback add: `CUDA_VISIBLE_DEVICES=""` before the command (will be slow).
+6. New env fallbacks:
+  * `LLM_FORCE_CPU=1` force full CPU load (disables automatic layer device mapping).
+  * `LLM_USE_4BIT=1` attempt 4-bit quantization for supported models (requires bitsandbytes; silently ignored if unavailable).
+  * `LLM_OFFLOAD_FOLDER=offload_weights` apply disk offload after load (create folder first; slow, last resort).
+### Example: Resource-Constrained Runs
+Force CPU and shorten generation length:
+```bash
+LLM_FORCE_CPU=1 python main_sample.py --model gemma-7b --in_prompt 6 --bsz 1 --N 1 --max_len 30 --out_subdir cpu_short
+```
+Attempt 4-bit quantization (if bitsandbytes installed):
+```bash
+LLM_USE_4BIT=1 python main_sample.py --model Mistral-7B --in_prompt 6 --bsz 2 --N 2 --out_subdir q4_try
+```
+Disk offload (slow):
+```bash
+mkdir -p offload_weights
+LLM_OFFLOAD_FOLDER=offload_weights python main_sample.py --model Llama-2-13b --in_prompt 6 --bsz 1 --N 1 --out_subdir offload_test
+```
 
 ---
 ## 8. Custom Cache & Auth

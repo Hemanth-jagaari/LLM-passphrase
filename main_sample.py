@@ -160,6 +160,7 @@ def main():
                     tokenizer,
                     red_list,
                     end_token_ids,
+                    max_num_toks=args.max_len,
                     temperature=temperature,
                     bot_q=bot_q,
                     top_p=top_p,

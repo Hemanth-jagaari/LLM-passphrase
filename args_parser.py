@@ -36,6 +36,12 @@ def parse_arguments():
     parser.add_argument("--red_list", action="store_true", help="red_list")
     parser.add_argument("--end_token_ids", action="store_true", help="end_token_ids")
     parser.add_argument(
+        "--max_len",
+        type=int,
+        default=50,
+        help="maximum number of generation tokens (default 50)",
+    )
+    parser.add_argument(
         "--model",
         type=str,
         choices=[
