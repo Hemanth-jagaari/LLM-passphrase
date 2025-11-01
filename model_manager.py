@@ -55,7 +55,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=device_map,
-                torch_dtype=pick_dtype(torch.float16),
+                dtype=pick_dtype(torch.float16),
                 quantization_config=quantization_config,
                 token=hf_token,
             )
@@ -64,7 +64,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=None,
-                torch_dtype=torch.float32,
+                dtype=torch.float32,
                 token=hf_token,
             )
     elif args_model == "Llama-2-13b":
@@ -74,7 +74,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=device_map,
-                torch_dtype=pick_dtype(torch.float16),
+                dtype=pick_dtype(torch.float16),
                 quantization_config=quantization_config,
                 token=hf_token,
             )
@@ -83,7 +83,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=None,
-                torch_dtype=torch.float32,
+                dtype=torch.float32,
                 token=hf_token,
             )
     elif args_model == "Llama-2-70b":
@@ -98,7 +98,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=device_map,
-                torch_dtype=pick_dtype(torch.float16),
+                dtype=pick_dtype(torch.float16),
                 quantization_config=big_quant_cfg,
                 token=hf_token,
             ).eval()
@@ -107,7 +107,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=None,
-                torch_dtype=torch.float32,
+                dtype=torch.float32,
                 token=hf_token,
             ).eval()
     elif args_model == "Llama-3-8B":
@@ -117,7 +117,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=device_map,
-                torch_dtype=pick_dtype(torch.bfloat16),
+                dtype=pick_dtype(torch.bfloat16),
                 quantization_config=quantization_config,
                 token=hf_token,
             )
@@ -126,7 +126,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=None,
-                torch_dtype=torch.float32,
+                dtype=torch.float32,
                 token=hf_token,
             )
     elif args_model == "Llama-3-70B":
@@ -136,7 +136,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=device_map,
-                torch_dtype=pick_dtype(torch.bfloat16),
+                dtype=pick_dtype(torch.bfloat16),
                 quantization_config=quantization_config,
                 token=hf_token,
             )
@@ -145,7 +145,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=None,
-                torch_dtype=torch.float32,
+                dtype=torch.float32,
                 token=hf_token,
             )
     elif args_model == "gemma-7b":
@@ -155,7 +155,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=device_map,
-                torch_dtype=pick_dtype(torch.bfloat16),
+                dtype=pick_dtype(torch.bfloat16),
                 quantization_config=quantization_config,
                 token=hf_token,
             )
@@ -164,7 +164,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=None,
-                torch_dtype=torch.float32,
+                dtype=torch.float32,
                 token=hf_token,
             )
     elif args_model == "Mistral-7B":
@@ -174,7 +174,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=device_map,
-                torch_dtype=pick_dtype(torch.float16),
+                dtype=pick_dtype(torch.float16),
                 quantization_config=quantization_config,
                 token=hf_token,
             )
@@ -183,7 +183,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=None,
-                torch_dtype=torch.float32,
+                dtype=torch.float32,
                 token=hf_token,
             )
     elif args_model == "Mixtral-8x7B":
@@ -197,7 +197,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=device_map,
-                torch_dtype=pick_dtype(torch.float16),
+                dtype=pick_dtype(torch.float16),
                 quantization_config=big_quant_cfg,
                 token=hf_token,
             ).eval()
@@ -206,7 +206,7 @@ def load_model_and_tokenizer(args_model):
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map=None,
-                torch_dtype=torch.float32,
+                dtype=torch.float32,
                 token=hf_token,
             ).eval()
     else:
